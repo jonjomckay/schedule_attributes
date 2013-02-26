@@ -19,7 +19,7 @@ module ScheduleAttributes::ActiveRecord
       options[:column_name] ||= ScheduleAttributes::DEFAULT_ATTRIBUTE_KEY
       @schedule_field = options[:column_name]
       @default_schedule = options[:default_schedule] if options.has_key?(:default_schedule)
-      serialize @schedule_field, ActiveRecord::Coders::Hstore
+      serialize @schedule_field, ScheduleAttributes::Serializer
       include ScheduleAttributes::ActiveRecord
     end
   end

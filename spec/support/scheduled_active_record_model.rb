@@ -1,19 +1,34 @@
 require 'active_record'
 require 'schedule_attributes/active_record'
+require 'activerecord-postgres-hstore'
 
 class ActiveRecord::Base
   extend ScheduleAttributes::ActiveRecord::Sugar
 
+  db = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/schedule_attributes_spec')
+
   establish_connection(
-    adapter: "sqlite3",
-    database: ":memory:"
+    :adapter  => db.scheme == 'postgres' ? 'postgresql' : db.scheme,
+    :host     => db.host,
+    :port     => db.port,
+    :username => db.user,
+    :password => db.password,
+    :database => db.path[1..-1],
+    :encoding => 'utf8'
   )
 end
 
+ActiveRecord::Migration.execute "CREATE EXTENSION IF NOT EXISTS hstore"
+
+ActiveRecord::Migration.drop_table :calendars
+
 ActiveRecord::Migration.create_table :calendars do |t|
-  t.text :schedule
-  t.text :my_schedule
+  t.hstore :schedule
+  t.hstore :my_schedule
 end
+
+ActiveRecord::Migration.add_hstore_index :calendars, :schedule
+ActiveRecord::Migration.add_hstore_index :calendars, :my_schedule
 
 class CustomScheduledActiveRecordModel < ActiveRecord::Base
   self.table_name = :calendars

@@ -1,11 +1,11 @@
 module ScheduleAttributes
   class Serializer
-    def self.load(yaml)
-      IceCube::Schedule.from_yaml(yaml) if yaml
+    def self.load(hstore)
+      IceCube::Schedule.from_hash(ActiveRecord::Coders::Hstore.load(hstore)) if hstore
     end
 
     def self.dump(schedule)
-      schedule.to_yaml if schedule
+      schedule.to_hash if schedule
     end
   end
 end
